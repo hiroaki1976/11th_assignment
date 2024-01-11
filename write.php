@@ -2,6 +2,14 @@
 session_start();
 require_once('function.php');
 
+// リファラーを取得
+$referer = @$_SERVER['HTTP_REFERER'];
+
+// リファラーが存在しない場合、直接アクセスとみなしエラーメッセージを表示
+if (empty($referer)) {
+    die('このページへの直接アクセスは禁止されています。');
+}
+
 //1. POSTデータ取得
 $jigyousyo = isset($_POST['jigyousyo']) ? $_POST['jigyousyo'] : '';
 $a_gata = isset($_POST['a_gata']) ? 'A型' . $_POST['a_gata'] : 'A型';
@@ -19,6 +27,24 @@ $password1 = isset($_POST['password1']) ? $_POST['password1'] : '';
 $password2 = isset($_POST['password2']) ? $_POST['password2'] : '';
 $time = date('Y/m/d H:i:s');
 $kanri_flg = 0;
+// 画像アップロードの処理
+$image = 'img/noimage.png';
+if (isset($_FILES['image'])) {
+    // 画像の名前をリネーム処理
+    // 一時保存されているファイルの場所を確認する
+    $upload_file = $_FILES['image']['tmp_name'];
+
+    // 送られてきた名前を確認する
+    $extension = pathinfo($_FILES['image']['name'],PATHINFO_EXTENSION);
+    // リネームする
+    $new_name = uniqid() . '.' . $extension;
+    $image_path = 'img/' . $new_name;
+
+    // 一時保存ファイルをimgフォルダに移動させる（保存する）
+    if (move_uploaded_file($upload_file, $image_path)) {
+        $image = $image_path;
+    }
+}
 
 $hashed_pw = password_hash($password1, PASSWORD_DEFAULT);
 
@@ -28,8 +54,8 @@ $pdo = db_conn();
 //3．データ登録SQL作成
 
 // 3-1. SQL文を用意
-$stmt = $pdo->prepare("INSERT INTO gs_bm_table(id, time, jigyousyo, officetype_a, officetype_b, officetype_ikou, officetype_other, postcode, prefecture, city, town, name, name_kana, email, password, kanri_flg)
-VALUES (NULL, sysdate(), :jigyousyo, :officetype_a, :officetype_b, :officetype_ikou, :officetype_other, :postcode, :prefecture, :city, :town, :name, :name_kana, :email, :password, :kanri_flg );");
+$stmt = $pdo->prepare("INSERT INTO gs_bm_table(id, time, jigyousyo, officetype_a, officetype_b, officetype_ikou, officetype_other, image, postcode, prefecture, city, town, name, name_kana, email, password, kanri_flg)
+VALUES (NULL, sysdate(), :jigyousyo, :officetype_a, :officetype_b, :officetype_ikou, :officetype_other, :image, :postcode, :prefecture, :city, :town, :name, :name_kana, :email, :password, :kanri_flg );");
 // 3-2. バインド変数を用意
 // Integer 数値の場合 PDO::PARAM_INT
 // String文字列の場合 PDO::PARAM_STR
@@ -38,6 +64,7 @@ $stmt->bindValue(':officetype_a', $a_gata, PDO::PARAM_STR);
 $stmt->bindValue(':officetype_b', $b_gata, PDO::PARAM_STR);
 $stmt->bindValue(':officetype_ikou', $ikou, PDO::PARAM_STR);
 $stmt->bindValue(':officetype_other', $other, PDO::PARAM_STR);
+$stmt->bindValue(':image', $image, PDO::PARAM_STR);
 $stmt->bindValue(':postcode', $postcode, PDO::PARAM_STR);
 $stmt->bindValue(':prefecture', $prefecture, PDO::PARAM_STR);
 $stmt->bindValue(':city', $city, PDO::PARAM_STR);
@@ -54,8 +81,8 @@ $status = $stmt->execute();
 // 3-４．データ登録処理後
 if($status === false){
   //SQL実行時にエラーがある場合（エラーオブジェクト取得して表示）
-  $error = $stmt->errorInfo();
-  exit('ErrorMessage:'.$error[2]);
+    $error = $stmt->errorInfo();
+    exit('ErrorMessage:'.$error[2]);
 }
 
 // 4.データをセッションに格納
@@ -64,6 +91,7 @@ $_SESSION['a_gata'] = $a_gata;
 $_SESSION['b_gata'] = $b_gata;
 $_SESSION['ikou'] = $ikou;
 $_SESSION['other'] = $other;
+$_SESSION['image'] = $image;
 $_SESSION['postcode'] = $postcode;
 $_SESSION['prefecture'] = $prefecture;
 $_SESSION['city'] = $city;
@@ -71,8 +99,6 @@ $_SESSION['town'] = $town;
 $_SESSION['name'] = $name;
 $_SESSION['name_kana'] = $name_kana;
 $_SESSION['email'] = $email;
-// $_SESSION['password1'] = $password1;
-// $_SESSION['password2'] = $password2;
 $_SESSION['time'] = $time;
 ?>
 

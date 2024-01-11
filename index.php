@@ -10,7 +10,8 @@
 <body>
     <h1>事業所様ユーザー登録</h1>
     <p class="onegai">ユーザー登録をお願い致します</p>
-    <form name="contact" action="write.php" method="post" id="myForm">
+    <!-- 画像を扱う時はformにenctype="multipart/form-data"を必ず入れる -->
+    <form name="contact" action="write.php" method="post" id="myForm" enctype="multipart/form-data">
         <dl>
             <dt><i class="red">【必須】</i>事業所名：</dt><dd><input type="text" name="jigyousyo" placeholder="事業所名を入力して下さい" class="width-height" required></dd>
             <dt>事業所種別：</dt>
@@ -18,6 +19,7 @@
                 <input type="checkbox" name="b_gata" id="b_gata">就労継続支援B型
                 <input type="checkbox" name="ikou" id="ikou">就労移行支援
                 <input type="checkbox" name="other" id="other">その他</dd>
+            <dt>イメージ画像：</dt><dd><input type="file" name="image" id="image"></dd>   
             <dt>郵便番号：</dt><dd><input name="postcode" type="text" placeholder="郵便番号を入力すると、住所が自動入力されます" class="width-height"></dd>
             <dt>都道府県：</dt><dd><input name="prefecture" type="text" placeholder="都道府県" class="width-height"></dd>
             <dt>市区町村：</dt><dd><input name="city" type="text" placeholder="市区町村" class="width-height"></dd>

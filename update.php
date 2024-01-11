@@ -20,6 +20,25 @@ $email = $_POST['email'];
 $password1 = $_POST['password1'];
 $id = $_POST['id'];
 
+// 画像アップロードの処理
+$image = 'img/noimage.png';
+if (isset($_FILES['image'])) {
+    // 画像の名前をリネーム処理
+    // 一時保存されているファイルの場所を確認する
+    $upload_file = $_FILES['image']['tmp_name'];
+
+    // 送られてきた名前を確認する
+    $extension = pathinfo($_FILES['image']['name'],PATHINFO_EXTENSION);
+    // リネームする
+    $new_name = uniqid() . '.' . $extension;
+    $image_path = 'img/' . $new_name;
+
+    // 一時保存ファイルをimgフォルダに移動させる（保存する）
+    if (move_uploaded_file($upload_file, $image_path)) {
+        $image = $image_path;
+    }
+}
+
 $hashed_pw = password_hash($password1, PASSWORD_DEFAULT);
 
 //2. DB接続します
@@ -31,7 +50,7 @@ $pdo = db_conn();
 $stmt = $pdo->prepare('UPDATE 
                         gs_bm_table
                         SET 
-                        jigyousyo = :jigyousyo, officetype_a = :officetype_a, officetype_b = :officetype_b, officetype_ikou = :officetype_ikou, officetype_other = :officetype_other, postcode = :postcode, prefecture = :prefecture, city = :city, town = :town, name = :name, name_kana = :name_kana, email = :email, password = :password
+                        jigyousyo = :jigyousyo, officetype_a = :officetype_a, officetype_b = :officetype_b, officetype_ikou = :officetype_ikou, officetype_other = :officetype_other, image = :image, postcode = :postcode, prefecture = :prefecture, city = :city, town = :town, name = :name, name_kana = :name_kana, email = :email, password = :password
                         WHERE id = :id; ');
 
 // 3-2. バインド変数を用意
@@ -43,6 +62,7 @@ $stmt->bindValue(':officetype_a', $a_gata, PDO::PARAM_STR);
 $stmt->bindValue(':officetype_b', $b_gata, PDO::PARAM_STR);
 $stmt->bindValue(':officetype_ikou', $ikou, PDO::PARAM_STR);
 $stmt->bindValue(':officetype_other', $other, PDO::PARAM_STR);
+$stmt->bindValue(':image', $image, PDO::PARAM_STR);
 $stmt->bindValue(':postcode', $postcode, PDO::PARAM_STR);
 $stmt->bindValue(':prefecture', $prefecture, PDO::PARAM_STR);
 $stmt->bindValue(':city', $city, PDO::PARAM_STR);

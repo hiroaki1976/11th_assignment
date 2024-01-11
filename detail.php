@@ -39,7 +39,7 @@ if ($status === false) {
 <body>
     <h1>ユーザー情報更新</h1>
     <p class="onegai">ユーザー情報更新</p>
-    <form name="contact" action="update.php" method="post" id="myForm">
+    <form name="contact" action="update.php" method="post" id="myForm" enctype="multipart/form-data">
         <dl>
             <dt>【必須】事業所名：</dt><dd><input type="text" name="jigyousyo" value="<?= h($result['jigyousyo']) ?>" required></dd>
             <dt>事業所種別：</dt>
@@ -48,6 +48,7 @@ if ($status === false) {
                 <input type="checkbox" name="ikou" id="ikou" <?= isset($result['officetype_ikou']) && h($result['officetype_ikou']) == '移行on' ? 'checked' : '' ?>>就労移行支援
                 <input type="checkbox" name="other" id="other" <?= isset($result['officetype_other']) && h($result['officetype_other']) == 'その他on' ? 'checked' : '' ?>>その他    
             </dd>
+            <dt>イメージ画像：</dt><dd><img src="<?= $result['image']?>" alt="イメージ画像"><br><input type="file" name="image" id="image"></dd>
             <dt>郵便番号</dt><dd><input name="postcode" type="text" value="<?= h($result['postcode']) ?>"></dd>
             <dt>都道府県</dt><dd><input name="prefecture" type="text" value="<?= h($result['prefecture']) ?>"></dd>
             <dt>市区町村</dt><dd><input name="city" type="text" value="<?= h($result['city']) ?>"></dd>
